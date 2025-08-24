@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evelyn’s Reading Adventure — Kinder MAP Practice</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --correct: #16a34a;
+      --wrong: #dc2626;
+      --shadow: 0 10px 24px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 16px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    header .title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: .95rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    .progress {
+      width: 100%;
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+    }
+    .progress__bar {
+      height: 10px;
+      width: 0%;
+      background: var(--primary);
+      transition: width .3s ease;
+    }
+    .question {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 6px 0 12px;
+    }
+    .emoji {
+      font-size: 64px;
+      line-height: 1;
+      display: inline-block;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,.1));
+    }
+    .passage {
+      font-size: 1.15rem;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .qtext {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    button.choice {
+      border: 2px solid #e5e7eb;
+      background: #fff;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .05s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    button.choice:hover { transform: translateY(-1px); }
+    button.choice:focus { outline: 3px solid rgba(37,99,235,.35); }
+    button.choice.correct {
+      background: rgba(22,163,74,.08);
+      border-color: rgba(22,163,74,.6);
+    }
+    button.choice.wrong {
+      background: rgba(220,38,38,.08);
+      border-color: rgba(220,38,38,.6);
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .btn {
+      border: 0;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      background: var(--primary);
+      color: #fff;
+      transition: transform .06s ease, opacity .2s ease, background .2s ease;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn.light {
+      background: #111827;
+      color: #fff;
+    }
+    .btn.ghost {
+      background: #fff;
+      color: var(--text);
+      border: 2px solid #e5e7eb;
+      box-shadow: none;
+    }
+    .score {
+      margin-left: auto;
+      font-weight: 800;
+    }
+    .feedback {
+      min-height: 28px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .feedback.good { color: var(--correct); }
+    .feedback.bad { color: var(--wrong); }
+    details.help {
+      margin-top: 10px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .summary {
+      text-align: center;
+      padding: 10px 0 4px;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+    .review {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .review-item {
+      background: #fff;
+      border: 2px solid #e5e7eb;
+      border-left-width: 8px;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    .review-item.ok { border-left-color: var(--correct); }
+    .review-item.ng { border-left-color: var(--wrong); }
+    .tiny {
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    @media (min-width: 720px) {
+      .question {
+        grid-template-columns: 128px 1fr;
+        align-items: center;
+      }
+      .passage {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="emoji" aria-hidden="true">📚</div>
+      <div>
+        <div class="title">Evelyn’s Reading Adventure</div>
+        <div class="subtitle">Kinder MAP-style practice • Click an answer, then press “Next”</div>
+      </div>
+    </header>
+
+    <div class="card" role="region" aria-live="polite">
+      <div class="progress" aria-label="Progress">
+        <div class="progress__bar" id="bar"></div>
+      </div>
+
+      <div class="question" id="question-area">
+        <!-- dynamic -->
+      </div>
+
+      <div class="controls">
+        <button class="btn ghost" id="readBtn" aria-label="Read this question aloud">🔊 Read</button>
+        <button class="btn light" id="nextBtn" disabled>Next ▶</button>
+        <div class="score" id="score">Score: 0</div>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <details class="help">
+        <summary>부모님 도움말 (Korean help)</summary>
+        <p class="tiny">상단의 <b>🔊 Read</b> 버튼을 누르면 브라우저가 영어 텍스트를 읽어줍니다. (일부 브라우저에서만 지원)</p>
+        <ul class="tiny">
+          <li>문장을 천천히 한 번 더 읽어주세요.</li>
+          <li>아이에게 보기 단어를 또박또박 읽어주세요.</li>
+          <li>정답 여부는 색으로 표시됩니다. 초록=정답, 빨강=오답.</li>
+        </ul>
+      </details>
+    </div>
+
+    <div id="end" class="card" style="margin-top:14px; display:none;">
+      <div class="summary" id="summaryText"></div>
+      <div class="review" id="reviewList"></div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
+        <button class="btn" id="restartBtn">🔁 Play Again</button>
+        <button class="btn ghost" id="readSummaryBtn">🔊 Read Summary</button>
+      </div>
+      <p class="tiny" style="text-align:center; margin-top:8px;">Great job, Evelyn! 🌟</p>
+    </div>
+  </div>
+
+  <script>
+    // Utility: shuffle array in-place
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    const QUESTIONS = [
+      // 1. Picture vocab - cat
+      {
+        id: 1,
+        emoji: "🐱",
+        passage: "",
+        question: "Which word matches the picture?",
+        options: [
+          { text: "dog", correct: false },
+          { text: "cat", correct: true },
+          { text: "fish", correct: false },
+          { text: "bird", correct: false }
+        ],
+        korean: {
+          passage: "",
+          question: "그림과 맞는 단어는 무엇일까요? (고양이)"
+        }
+      },
+      // 2. Picture vocab - apple
+      {
+        id: 2,
+        emoji: "🍎",
+        passage: "",
+        question: "Which word matches the picture?",
+        options: [
+          { text: "apple", correct: true },
+          { text: "banana", correct: false },
+          { text: "grape", correct: false },
+          { text: "orange", correct: false }
+        ],
+        korean: {
+          passage: "",
+          question: "그림과 맞는 단어는 무엇일까요? (사과)"
+        }
+      },
+      // 3. Short story - ball
+      {
+        id: 3,
+        emoji: "⚽️",
+        passage: "Tim has a red ball. He plays with the ball.",
+        question: "What does Tim have?",
+        options: [
+          { text: "a hat", correct: false },
+          { text: "a ball", correct: true },
+          { text: "a book", correct: false },
+          { text: "a car", correct: false }
+        ],
+        korean: {
+          passage: "팀에게 빨간 공이 있어요. 팀은 그 공으로 놉니다.",
+          question: "팀은 무엇을 가지고 있나요?"
+        }
+      },
+      // 4. Sequence - breakfast first
+      {
+        id: 4,
+        emoji: "🥣",
+        passage: "Anna eats breakfast. Then she goes to school.",
+        question: "What does Anna do first?",
+        options: [
+          { text: "Go to school", correct: false },
+          { text: "Eat breakfast", correct: true },
+          { text: "Sleep", correct: false },
+          { text: "Read a book", correct: false }
+        ],
+        korean: {
+          passage: "안나는 아침을 먹고, 그 다음 학교에 갑니다.",
+          question: "안나가 먼저 한 일은 무엇인가요?"
+        }
+      },
+      // 5. Inference - cold weather
+      {
+        id: 5,
+        emoji: "🧥",
+        passage: "Sam wears a coat. It is very cold outside.",
+        question: "How is the weather?",
+        options: [
+          { text: "hot", correct: false },
+          { text: "cold", correct: true },
+          { text: "rainy", correct: false },
+          { text: "windy", correct: false }
+        ],
+        korean: {
+          passage: "샘은 코트를 입었어요. 밖은 아주 추워요.",
+          question: "날씨는 어떤가요?"
+        }
+      },
+      // 6. Main idea - birthday party
+      {
+        id: 6,
+        emoji: "🎂",
+        passage: "Mom and Dad bake a cake. They put candles on it. They sing a song.",
+        question: "What is this story mostly about?",
+        options: [
+          { text: "A birthday party", correct: true },
+          { text: "A school bus", correct: false },
+          { text: "A zoo trip", correct: false },
+          { text: "A beach day", correct: false }
+        ],
+        korean: {
+          passage: "엄마 아빠가 케이크를 만들고, 촛불을 꽂고, 노래를 불러요.",
+          question: "이 이야기는 주로 무엇에 관한 걸까요?"
+        }
+      },
+      // 7. Rhyme - cat
+      {
+        id: 7,
+        emoji: "🎵",
+        passage: "",
+        question: "Which word rhymes with “cat”?",
+        options: [
+          { text: "hat", correct: true },
+          { text: "dog", correct: false },
+          { text: "sun", correct: false },
+          { text: "fish", correct: false }
+        ],
+        korean: {
+          passage: "",
+          question: "다음 중 'cat'과 운이 맞는 단어는 무엇일까요?"
+        }
+      },
+      // 8. Feeling - sad
+      {
+        id: 8,
+        emoji: "😢",
+        passage: "Ben lost his toy. He cries.",
+        question: "How does Ben feel?",
+        options: [
+          { text: "happy", correct: false },
+          { text: "sad", correct: true },
+          { text: "hungry", correct: false },
+          { text: "sleepy", correct: false }
+        ],
+        korean: {
+          passage: "벤은 장난감을 잃어버렸어요. 그는 울고 있어요.",
+          question: "벤의 기분은 어떤가요?"
+        }
+      },
+      // 9. Inference - rain
+      {
+        id: 9,
+        emoji: "🌂",
+        passage: "Lisa takes an umbrella. The sky is gray.",
+        question: "What will probably happen?",
+        options: [
+          { text: "It will snow", correct: false },
+          { text: "It will rain", correct: true },
+          { text: "It will be sunny", correct: false },
+          { text: "It will be windy", correct: false }
+        ],
+        korean: {
+          passage: "리사는 우산을 가져갑니다. 하늘은 회색이에요.",
+          question: "무슨 일이 일어날 가능성이 클까요?"
+        }
+      },
+      // 10. Picture vocab - car
+      {
+        id: 10,
+        emoji: "🚗",
+        passage: "",
+        question: "Which word matches the picture?",
+        options: [
+          { text: "car", correct: true },
+          { text: "bus", correct: false },
+          { text: "train", correct: false },
+          { text: "bike", correct: false }
+        ],
+        korean: {
+          passage: "",
+          question: "그림과 맞는 단어는 무엇일까요? (자동차)"
+        }
+      }
+    ];
+
+    // State
+    let order = [...Array(QUESTIONS.length).keys()]; // 0..n-1
+    let index = 0;
+    let score = 0;
+    let answered = []; // {id, chosen, correct(bool)}
+    let locked = false;
+
+    // Elements
+    const bar = document.getElementById('bar');
+    const qArea = document.getElementById('question-area');
+    const nextBtn = document.getElementById('nextBtn');
+    const readBtn = document.getElementById('readBtn');
+    const scoreEl = document.getElementById('score');
+    const feedbackEl = document.getElementById('feedback');
+    const endCard = document.getElementById('end');
+    const summaryText = document.getElementById('summaryText');
+    const reviewList = document.getElementById('reviewList');
+    const restartBtn = document.getElementById('restartBtn');
+    const readSummaryBtn = document.getElementById('readSummaryBtn');
+
+    function init() {
+      // shuffle question order & shuffle options for each question
+      order = shuffle(order);
+      QUESTIONS.forEach(q => shuffle(q.options));
+      index = 0;
+      score = 0;
+      answered = [];
+      locked = false;
+      endCard.style.display = 'none';
+      nextBtn.disabled = true;
+      scoreEl.textContent = `Score: ${score}`;
+      feedbackEl.textContent = '';
+      render();
+    }
+
+    function render() {
+      const q = QUESTIONS[order[index]];
+      const progress = ((index) / QUESTIONS.length) * 100;
+      bar.style.width = `${progress}%`;
+
+      qArea.innerHTML = '';
+
+      const emoji = document.createElement('div');
+      emoji.className = 'emoji';
+      emoji.textContent = q.emoji || '📖';
+      emoji.setAttribute('aria-hidden', 'true');
+
+      const passage = document.createElement('div');
+      passage.className = 'passage';
+      passage.textContent = q.passage || "Look at the picture and choose the matching word.";
+
+      const qtext = document.createElement('div');
+      qtext.className = 'qtext';
+      qtext.textContent = q.question;
+
+      const leftCol = document.createElement('div');
+      leftCol.appendChild(emoji);
+
+      const rightCol = document.createElement('div');
+      rightCol.appendChild(passage);
+      rightCol.appendChild(qtext);
+
+      // For small screens, grid is single column; we still append in order
+      qArea.appendChild(leftCol);
+      qArea.appendChild(rightCol);
+
+      const choices = document.createElement('div');
+      choices.className = 'choices';
+
+      q.options.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = opt.text;
+        btn.setAttribute('data-correct', opt.correct ? '1' : '0');
+        btn.setAttribute('aria-pressed', 'false');
+        btn.addEventListener('click', () => onChoose(btn, opt.correct, q));
+        choices.appendChild(btn);
+      });
+
+      // Korean help details per question
+      const help = document.createElement('details');
+      help.className = 'help';
+      const sm = document.createElement('summary');
+      sm.textContent = '한국어 힌트 보기 (Show Korean help)';
+      const helpBody = document.createElement('div');
+      const kp = document.createElement('p');
+      kp.innerHTML = `<strong>문장:</strong> ${q.korean.passage || '(그림 보고 맞추기)'}<br><strong>질문:</strong> ${q.korean.question}`;
+      helpBody.appendChild(kp);
+      help.appendChild(sm);
+      help.appendChild(helpBody);
+
+      qArea.appendChild(choices);
+      qArea.appendChild(help);
+
+      // Prepare buttons
+      nextBtn.disabled = true;
+      feedbackEl.textContent = '';
+      locked = false;
+    }
+
+    function onChoose(btn, isCorrect, q) {
+      if (locked) return;
+      locked = true;
+
+      // mark selections
+      const all = qArea.querySelectorAll('button.choice');
+      all.forEach(b => b.disabled = true);
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        feedbackEl.textContent = 'Great job! ✅';
+        feedbackEl.className = 'feedback good';
+        score += 1;
+      } else {
+        btn.classList.add('wrong');
+        feedbackEl.textContent = 'Nice try! Let’s look again. ❌';
+        feedbackEl.className = 'feedback bad';
+        // also highlight the correct one
+        all.forEach(b => {
+          if (b.getAttribute('data-correct') === '1') {
+            b.classList.add('correct');
+          }
+        });
+      }
+      // record answer
+      answered.push({
+        id: q.id,
+        question: q.question,
+        chosen: btn.textContent,
+        correct: isCorrect,
+        correctAnswer: q.options.find(o => o.correct).text,
+        passage: q.passage,
+        emoji: q.emoji
+      });
+
+      scoreEl.textContent = `Score: ${score}`;
+      nextBtn.disabled = false;
+    }
+
+    function next() {
+      if (index < QUESTIONS.length - 1) {
+        index += 1;
+        render();
+      } else {
+        finish();
+      }
+    }
+
+    function finish() {
+      // fill progress
+      bar.style.width = '100%';
+      // hide question card controls? We'll just show a summary card below
+      endCard.style.display = 'block';
+
+      const total = QUESTIONS.length;
+      summaryText.textContent = `You got ${score} out of ${total}! 🎉`;
+
+      reviewList.innerHTML = '';
+      answered.forEach((a, i) => {
+        const item = document.createElement('div');
+        item.className = 'review-item ' + (a.correct ? 'ok' : 'ng');
+        item.innerHTML = `
+          <div><span class="emoji">${a.emoji || '📖'}</span> <strong>Q${i+1}.</strong> ${a.question}</div>
+          ${a.passage ? `<div class="tiny" style="margin-top:4px;"><em>“${a.passage}”</em></div>` : ''}
+          <div style="margin-top:6px;">Your answer: <strong>${a.chosen}</strong> ${a.correct ? '✅' : '❌'}</div>
+          ${!a.correct ? `<div class="tiny">Correct: <strong>${a.correctAnswer}</strong></div>` : ''}
+        `;
+        reviewList.appendChild(item);
+      });
+      speakSummary();
+    }
+
+    function speak(text) {
+      try {
+        window.speechSynthesis.cancel(); // stop prior speech
+        const u = new SpeechSynthesisUtterance(text);
+        // Prefer an English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const en = voices.find(v => /en(-|_)?(US|GB|AU|CA|IN)/i.test(v.lang));
+        if (en) u.voice = en;
+        u.rate = 0.92;
+        u.pitch = 1.0;
+        u.volume = 1.0;
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.warn('Speech not available', e);
+      }
+    }
+
+    function speakCurrent() {
+      const q = QUESTIONS[order[index]];
+      const choices = q.options.map((o, i) => `${String.fromCharCode(65+i)}. ${o.text}`).join(', ');
+      const text = [
+        q.passage ? q.passage : '',
+        q.question,
+        'Choices: ' + choices
+      ].filter(Boolean).join('. ');
+      speak(text);
+    }
+
+    function speakSummary() {
+      const total = QUESTIONS.length;
+      speak(`Great job! You got ${score} out of ${total} correct.`);
+    }
+
+    // Wire up
+    nextBtn.addEventListener('click', next);
+    readBtn.addEventListener('click', speakCurrent);
+    restartBtn.addEventListener('click', init);
+    readSummaryBtn.addEventListener('click', speakSummary);
+
+    // Some browsers load voices async
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {};
+    }
+
+    // Go!
+    init();
+  </script>
+</body>
+</html>
